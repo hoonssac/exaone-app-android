@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.main.MainActivity">
+
+    <!-- 메인 콘텐츠 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/background_white">
+
+        <!-- 툴바 -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/background_white"
+            android:elevation="0dp"
+            app:popupTheme="@style/Theme.ExaoneAgent.PopupOverlay"
+            app:navigationIcon="@android:drawable/ic_menu_sort_by_size">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EXAONE"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_gravity="center" />
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <!-- 채팅 Fragment 컨테이너 -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <!-- 네비게이션 드로어 (좌측, 스레드 목록) -->
+    <LinearLayout
+        android:id="@+id/navigation_drawer"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@color/background_white">
+
+        <!-- 드로어 헤더 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/background_white"
+            android:gravity="center"
+            android:paddingTop="48dp"
+            android:paddingBottom="32dp">
+
+            <ImageView
+                android:layout_width="160dp"
+                android:layout_height="60dp"
+                android:src="@drawable/exaone_logo2"
+                android:contentDescription="EXAONE Logo"
+                android:scaleType="centerInside" />
+
+        </LinearLayout>
+
+        <!-- NavigationDrawerFragment 컨테이너 -->
+        <FrameLayout
+            android:id="@+id/drawer_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

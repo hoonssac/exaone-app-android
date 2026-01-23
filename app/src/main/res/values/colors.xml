@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- EXAONE Brand Colors -->
+    <color name="exaone_primary">#6656FF</color>
+    <color name="exaone_secondary">#C824CC</color>
+    <color name="exaone_accent">#43CBFF</color>
+
+    <!-- Legacy Color (kept for compatibility) -->
+    <color name="exaone_red">#6656FF</color>
+    <color name="exaone_red_dark">#C824CC</color>
+    <color name="exaone_primary_light">#7A6BFF</color>
+
+    <!-- Background Colors -->
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_light">#F5F6F8</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#1A1A2E</color>
+    <color name="text_secondary">#767685</color>
+    <color name="text_hint">#ADB5BD</color>
+
+    <!-- Card Colors -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_border">#E9ECEF</color>
+    
+    <!-- Chat Colors -->
+    <color name="user_message_bg">#5E60CE</color>
+    <color name="user_message_bg_light">#F4F4FE</color>
+</resources>

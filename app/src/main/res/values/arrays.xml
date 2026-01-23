@@ -1,0 +1,18 @@
+<resources>
+    <string-array name="department_list">
+        <item>IT개발팀</item>
+        <item>데이터분석팀</item>
+        <item>경영지원팀</item>
+        <item>영업팀</item>
+        <item>생산관리팀</item>
+    </string-array>
+
+    <string-array name="position_list">
+        <item>사원</item>
+        <item>주임</item>
+        <item>대리</item>
+        <item>과장</item>
+        <item>차장</item>
+        <item>부장</item>
+    </string-array>
+</resources>

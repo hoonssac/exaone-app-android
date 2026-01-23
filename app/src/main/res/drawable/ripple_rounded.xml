@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/radius_round" /> <!-- 버튼 모서리 둥글게 -->
+            <solid android:color="@android:color/black" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/radius_round" />
+            <solid android:color="@android:color/transparent" /> <!-- 평소에는 투명 -->
+        </shape>
+    </item>
+</ripple>

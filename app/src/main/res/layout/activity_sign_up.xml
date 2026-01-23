@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_white"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="40dp">
+
+        <!-- 뒤로가기 -->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:padding="4dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 로고 -->
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="EXAONE Logo"
+            android:scaleType="centerInside"
+            android:src="@drawable/exaone_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivBack" />
+
+        <!-- 타이틀 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="회원가입"
+            android:textColor="@color/text_primary"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivLogo" />
+
+        <TextView
+            android:id="@+id/tvSubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="사내 업무 지원을 위한 계정을 생성합니다."
+            android:textColor="@color/text_secondary"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+        <!-- 1. 이메일 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmail"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tvSubTitle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="이메일"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2. 이름 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tilEmail">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="이름"
+                android:inputType="textPersonName"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 3. 비밀번호 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:endIconMode="password_toggle"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tilName">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="비밀번호 (8자 이상, 영문/숫자 포함)"
+                android:inputType="textPassword"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 4. 사원ID -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmployeeId"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tilPassword">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmployeeId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="사원ID (8자리)"
+                android:inputType="text"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 5. 부서 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDept"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tilEmployeeId">
+
+            <AutoCompleteTextView
+                android:id="@+id/spinnerDept"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="부서 선택"
+                android:inputType="none"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 6. 직급 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPosition"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="@color/background_light"
+            app:boxCornerRadiusBottomEnd="@dimen/radius_round"
+            app:boxCornerRadiusBottomStart="@dimen/radius_round"
+            app:boxCornerRadiusTopEnd="@dimen/radius_round"
+            app:boxCornerRadiusTopStart="@dimen/radius_round"
+            app:boxStrokeWidth="0dp"
+            app:hintTextColor="@color/text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/tilDept">
+
+            <AutoCompleteTextView
+                android:id="@+id/spinnerPosition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="직급 선택"
+                android:inputType="none"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 가입 버튼 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="40dp"
+            android:backgroundTint="@null"
+            android:background="@drawable/button_disabled"
+            android:enabled="false"
+            android:text="가입 완료"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:cornerRadius="@dimen/radius_round"
+            app:layout_constraintTop_toBottomOf="@id/tilPosition" />
+
+        <!-- 로그인 링크 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnSignUp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이미 계정이 있으신가요? "
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvLoginLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로그인하기"
+                android:textColor="@color/exaone_primary"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

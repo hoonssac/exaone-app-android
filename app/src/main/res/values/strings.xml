@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">EXAONE</string>
+
+    <!-- Sign up spinner prompts -->
+    <string name="department_prompt">부서를 선택하세요</string>
+    <string name="position_prompt">직급을 선택하세요</string>
+</resources>
