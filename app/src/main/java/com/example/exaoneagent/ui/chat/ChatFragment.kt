@@ -30,11 +30,15 @@ class ChatFragment : Fragment() {
     private lateinit var messageAdapter: MessageAdapter
     private val tag = "ChatFragment"
     private var lastMessageCount = 0
+    private var currentMessageList: List<MessageEntity> = emptyList()
 
     // 음성 녹음 관련
     private lateinit var audioRecorderManager: AudioRecorderManager
     private var isRecording = false
     private val PERMISSION_REQUEST_CODE = 100
+
+    // 알림 카드 클릭 후 음성 메시지를 "메일로 보내줘"로 고정
+    private var isAfterNotificationCard = false
 
     // 음성 재생 관련
     private var mediaPlayer: MediaPlayer? = null
@@ -128,8 +132,9 @@ class ChatFragment : Fragment() {
 
         messages.observe(viewLifecycleOwner) { messageList ->
             try {
-                messageAdapter.submitList(messageList)
-                updateGuideVisibility(messageList)
+                currentMessageList = messageList
+                updateAdapterList(currentMessageList, viewModel.isLoading.value == true)
+                
                 lastMessageCount = messageList.size
                 Log.d(tag, "✅ 메시지 로드: ${messageList.size}개")
             } catch (e: Exception) {
@@ -140,6 +145,11 @@ class ChatFragment : Fragment() {
         // 로딩 상태 변경 감지
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.btnSend.isEnabled = !isLoading
+            // 녹음 중이 아닐 때만 음성 버튼 제어 (녹음 중엔 멈추기 위해 활성 유지)
+            if (!isRecording) {
+                binding.btnVoice.isEnabled = !isLoading
+            }
+            updateAdapterList(currentMessageList, isLoading)
         }
 
         // 에러 메시지
@@ -149,12 +159,31 @@ class ChatFragment : Fragment() {
             }
         }
 
-        // 쿼리 응답 - TTS 변환
+        // 쿼리 응답 - 타이핑 애니메이션 + TTS 변환
         viewModel.queryResponse.observe(viewLifecycleOwner) { response ->
             if (response != null) {
                 Log.d(tag, "✅ 응답 받음 - 스레드: ${response.threadId}, 메시지: ${response.messageId}")
-                // AI 응답을 TTS로 변환
-                viewModel.convertToSpeech(response.naturalResponse)
+
+                viewModel.startTypewriter(response.naturalResponse)
+
+                // 첫 문장 + 마지막 문장만 TTS로 읽기
+                val ttsText = extractFirstAndLastSentence(response.naturalResponse)
+                Log.d(tag, "🔊 TTS 텍스트: $ttsText")
+                viewModel.convertToSpeech(ttsText)
+            }
+        }
+
+        // 타이핑 애니메이션: 전체 텍스트가 일치하는 ViewHolder만 업데이트 (이전 메시지 덮어쓰기 방지)
+        viewModel.typingState.observe(viewLifecycleOwner) { state ->
+            if (state != null) {
+                val (fullText, partialText) = state
+                val targetPos = messageAdapter.currentList.indexOfLast {
+                    it.role == "assistant" && it.message == fullText
+                }
+                if (targetPos >= 0) {
+                    val vh = binding.rvMessages.findViewHolderForAdapterPosition(targetPos)
+                    (vh as? MessageAdapter.AssistantMessageViewHolder)?.updateText(partialText)
+                }
             }
         }
 
@@ -166,6 +195,21 @@ class ChatFragment : Fragment() {
                 com.google.android.material.snackbar.Snackbar.make(binding.root, "음성 재생 실패", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun updateAdapterList(messages: List<MessageEntity>, isLoading: Boolean) {
+        val finalList = messages.toMutableList()
+        if (isLoading) {
+            finalList.add(MessageEntity(
+                id = -9999L,
+                threadId = -1,
+                role = "loading",
+                message = "",
+                createdAt = ""
+            ))
+        }
+        messageAdapter.submitList(finalList)
+        updateGuideVisibility(messages)
     }
 
     /**
@@ -192,6 +236,17 @@ class ChatFragment : Fragment() {
         binding.btnVoice.setOnClickListener {
             handleVoiceButtonClick()
         }
+
+        // 알림 카드 클릭 시 메시지 자동 전송
+        binding.cardNotification.setOnClickListener {
+            val autoMessage = "최근 일주일간 발생한 불량 내용을 알려줘"
+            isAfterNotificationCard = true
+            viewModel.sendMessage(
+                message = autoMessage,
+                contextTag = "@일반"
+            )
+            Log.d(tag, "알림 카드 클릭: 메시지 자동 전송 - $autoMessage")
+        }
     }
 
     /**
@@ -202,10 +257,26 @@ class ChatFragment : Fragment() {
             // 메시지가 없으면 가이드 표시
             binding.guideContainer.visibility = View.VISIBLE
             binding.rvMessages.visibility = View.GONE
+            
+            // 알림 카드 애니메이션 (위에서 아래로 슬라이드 + 페이드 인)
+            if (binding.cardNotification.visibility != View.VISIBLE) {
+                binding.cardNotification.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    translationY = -50f
+                    animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(500)
+                        .setStartDelay(500) // 타이틀이 보인 후 부드럽게 등장하도록 딜레이
+                        .start()
+                }
+            }
         } else {
             // 메시지가 있으면 메시지 목록 표시
             binding.guideContainer.visibility = View.GONE
             binding.rvMessages.visibility = View.VISIBLE
+            binding.cardNotification.visibility = View.GONE
         }
     }
 
@@ -270,8 +341,19 @@ class ChatFragment : Fragment() {
         binding.btnVoice.setIconTintResource(android.R.color.darker_gray)
 
         if (audioFile != null && audioFile.exists()) {
-            viewModel.sendVoiceMessage(audioFile)
-            Log.d(tag, "✅ 음성 메시지 전송: ${audioFile.absolutePath}")
+            if (isAfterNotificationCard) {
+                // 알림 카드 이후 음성은 "메일로 보내줘"로 고정 전송
+                isAfterNotificationCard = false
+                audioFile.delete()
+                viewModel.sendMessage(
+                    message = "메일로 보내줘",
+                    contextTag = "@일반"
+                )
+                Log.d(tag, "✅ 알림 카드 후속 음성 → '메일로 보내줘' 텍스트로 전송")
+            } else {
+                viewModel.sendVoiceMessage(audioFile)
+                Log.d(tag, "✅ 음성 메시지 전송: ${audioFile.absolutePath}")
+            }
         } else {
             com.google.android.material.snackbar.Snackbar.make(binding.root, "음성 녹음이 실패했습니다", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
             Log.e(tag, "❌ 녹음된 파일이 없음")
@@ -296,6 +378,24 @@ class ChatFragment : Fragment() {
                 com.google.android.material.snackbar.Snackbar.make(binding.root, "마이크 권한이 필요합니다", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                 Log.d(tag, "❌ 마이크 권한 거부됨")
             }
+        }
+    }
+
+    /**
+     * 응답 텍스트에서 첫 문장과 마지막 문장만 추출
+     * 예) "최근 일주일 기준 불량 현황 요약입니다. 주요 불량 유형: ... 필요하시다면 메일로 보내드릴까요?"
+     *  → "최근 일주일 기준 불량 현황 요약입니다. 필요하시다면 메일로 보내드릴까요?"
+     */
+    private fun extractFirstAndLastSentence(text: String): String {
+        // 마침표·물음표·느낌표 또는 줄바꿈 기준으로 문장 분리
+        val sentences = text
+            .split(Regex("(?<=[.?!])\\s+|\\n+"))
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+        return when {
+            sentences.size <= 1 -> text
+            else -> "${sentences.first()} ${sentences.last()}"
         }
     }
 

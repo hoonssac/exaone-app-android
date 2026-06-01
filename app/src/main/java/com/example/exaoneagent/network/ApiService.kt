@@ -11,6 +11,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.Part
 import retrofit2.http.Query
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 
 interface ApiService {
@@ -66,7 +67,7 @@ interface ApiService {
     @POST("api/v1/query/voice")
     suspend fun processVoiceQuery(
         @Part file: MultipartBody.Part,
-        @Query("thread_id") threadId: Long?,
+        @Part("thread_id") threadId: RequestBody?,
         @Header("Authorization") token: String
     ): QueryResponse
 

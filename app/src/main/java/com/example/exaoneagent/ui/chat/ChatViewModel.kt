@@ -13,6 +13,7 @@ import com.example.exaoneagent.data.local.PreferenceManager
 import com.example.exaoneagent.data.repository.ChatRepository
 import com.example.exaoneagent.network.RetrofitClient
 import com.example.exaoneagent.network.dto.QueryResponse
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -31,6 +32,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     // TTS 변환 이벤트
     private val _ttsEvent = MutableLiveData<ByteArray?>()
     val ttsEvent: LiveData<ByteArray?> get() = _ttsEvent
+
+    // 타이핑 애니메이션 (fullText to partialText, null = 애니메이션 없음)
+    private val _typingState = MutableLiveData<Pair<String, String>?>()
+    val typingState: LiveData<Pair<String, String>?> get() = _typingState
 
     // 모든 스레드
     private val _allThreads: LiveData<List<ThreadEntity>> = repository.getAllThreads()
@@ -124,12 +129,33 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         val threadId = _currentThread.value?.id
 
+        // 1️⃣ 새 채팅(New Chat)일 경우: 임시 메시지를 생성하여 UI에 즉시 표시 (Optimistic UI)
+        if (threadId == null) {
+            val tempUserMessage = MessageEntity(
+                id = System.currentTimeMillis(),
+                threadId = -1, // 임시 Thread ID
+                role = "user",
+                message = message,
+                contextTag = contextTag,
+                createdAt = java.time.LocalDateTime.now().toString()
+            )
+            // 현재 메시지 리스트를 임시 리스트로 교체하여 화면에 바로 표시
+            _currentMessages.value = MutableLiveData(listOf(tempUserMessage))
+            // 새 채팅에서는 즉시 로딩 상태로 전환 (음성 버튼 등 중복 입력 방지)
+            _isLoading.value = true
+            Log.d(tag, "✅ 새 채팅: 임시 메시지 UI 표시 완료")
+        }
+
         // 백그라운드에서 서버 요청
         viewModelScope.launch {
-            // 로딩 지연 표시를 위한 Job
-            val loadingJob = launch {
-                kotlinx.coroutines.delay(600)
-                _isLoading.value = true
+            // 기존 스레드일 때만 로딩 지연 표시 (새 채팅은 이미 위에서 즉시 설정)
+            val loadingJob = if (threadId != null) {
+                launch {
+                    kotlinx.coroutines.delay(600)
+                    _isLoading.value = true
+                }
+            } else {
+                null
             }
 
             try {
@@ -170,7 +196,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     Log.e(tag, "❌ 메시지 전송 실패")
                 }
             } finally {
-                loadingJob.cancel() // 응답이 오면 로딩 켜지는 예약 취소
+                loadingJob?.cancel() // 응답이 오면 로딩 켜지는 예약 취소
                 _isLoading.value = false
             }
         }
@@ -246,24 +272,25 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 if (response != null) {
                     _queryResponse.value = response
 
-                    // 새 스레드 생성된 경우
-                    if (threadId == null) {
+                    val actualThreadId = response.threadId
+                    val currentThread = _currentThread.value
+
+                    if (currentThread != null && currentThread.id == actualThreadId) {
+                        // 기존 스레드에 음성 메시지 추가 - 로컬 DB에서 최신 메시지 로드
+                        _currentMessages.value = repository.getThreadMessages(actualThreadId)
+                        Log.d(tag, "✅ 기존 스레드에 음성 메시지 추가: $actualThreadId")
+                    } else {
+                        // 새 스레드 생성 또는 서버가 다른 threadId 반환
                         val newThread = ThreadEntity(
-                            id = response.threadId,
+                            id = actualThreadId,
                             title = "음성 메시지",
                             messageCount = 2,
                             createdAt = response.createdAt,
                             updatedAt = response.createdAt
                         )
-
-                        // 새 스레드: 메시지는 sendVoiceMessage()에서 이미 저장했으므로 바로 표시
                         _currentThread.value = newThread
                         _currentMessages.value = repository.getThreadMessages(newThread.id)
-                        Log.d(tag, "✅ 새 스레드 생성 및 메시지 표시")
-                    } else {
-                        // 기존 스레드: selectThread 호출해서 서버에서 메시지 동기화
-                        _currentThread.value?.let { selectThread(it) }
-                        Log.d(tag, "✅ 기존 스레드에 메시지 추가")
+                        Log.d(tag, "✅ 새 스레드 생성 및 메시지 표시: $actualThreadId")
                     }
 
                     Log.d(tag, "✅ 음성 메시지 전송 완료")
@@ -279,6 +306,23 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 audioFile.delete()
                 Log.d(tag, "🗑️ 녹음 파일 삭제됨")
             }
+        }
+    }
+
+    /**
+     * 글자 단위 타이핑 애니메이션
+     */
+    fun startTypewriter(text: String) {
+        viewModelScope.launch {
+            // 새 메시지가 리스트에 추가될 시간을 확보
+            delay(80L)
+            val sb = StringBuilder()
+            for (char in text) {
+                sb.append(char)
+                _typingState.value = text to sb.toString()
+                delay(20L)
+            }
+            _typingState.value = null
         }
     }
 

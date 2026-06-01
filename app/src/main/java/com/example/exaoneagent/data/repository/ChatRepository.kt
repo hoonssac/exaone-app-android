@@ -13,8 +13,10 @@ import com.example.exaoneagent.network.dto.ChatThreadResponse
 import com.example.exaoneagent.network.dto.ChatMessageResponse
 import com.example.exaoneagent.network.dto.TTSRequest
 import com.example.exaoneagent.network.dto.ThreadDeleteResponse
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 class ChatRepository(
@@ -289,9 +291,12 @@ class ChatRepository(
                 requestBody
             )
 
+            // threadId를 multipart 폼 필드로 변환 (null이면 생략)
+            val threadIdPart = threadId?.toString()?.toRequestBody("text/plain".toMediaType())
+
             Log.d(tag, "📤 음성 파일 업로드: ${audioFile.name} (${audioFile.length()}bytes), threadId: $threadId")
-            // API 호출 (threadId 함께 전송)
-            val response = apiService.processVoiceQuery(filePart, threadId, "Bearer $token")
+            // API 호출 (threadId 폼 필드로 전송)
+            val response = apiService.processVoiceQuery(filePart, threadIdPart, "Bearer $token")
 
             // 응답 처리 (텍스트 쿼리와 동일한 방식)
             val actualThreadId = response.threadId
@@ -318,7 +323,7 @@ class ChatRepository(
                 id = response.messageId,
                 threadId = actualThreadId,
                 role = "user",
-                message = "[음성 메시지]",  // 변환된 텍스트는 서버에서 처리
+                message = response.originalMessage,  // 서버에서 변환된 텍스트 사용
                 contextTag = null,
                 createdAt = response.createdAt
             )
